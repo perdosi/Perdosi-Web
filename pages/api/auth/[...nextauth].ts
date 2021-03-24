@@ -1,13 +1,13 @@
-import { NextApiHandler } from "next"
-import NextAuth from "next-auth"
-import Providers from "next-auth/providers"
+import { NextApiHandler } from 'next'
+import NextAuth from 'next-auth'
+import Providers from 'next-auth/providers'
 import { argon2i } from 'argon2-ffi'
 
-import prisma from "lib/prisma"
-import { clearSessionAPI } from "services/api"
+import prisma from 'lib/prisma'
+import { clearSessionAPI } from 'services/api'
 
-const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options);
-export default authHandler;
+const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options)
+export default authHandler
 
 const options = {
   pages: {
@@ -22,15 +22,16 @@ const options = {
       // You can specify whatever fields you are expecting to be submitted.
       // e.g. domain, username, password, 2FA token, etc.
       credentials: {
-        email: { label: "Email", type: "text", placeholder: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'text', placeholder: 'email' },
+        password: { label: 'Password', type: 'password' }
       },
+      // @ts-ignore
       authorize: async (credentials) => {
         const { email, password } = credentials
         try {
           const { value: projectId } = await prisma.option.findFirst({
             where: {
-              name: "PROJECT_ID"
+              name: 'PROJECT_ID'
             }
           })
           const isExist = await prisma.user.findFirst({
@@ -43,11 +44,18 @@ const options = {
             }
           })
           if (isExist) {
-            const inputPassword = Buffer.from(password);
-            const isAuthenticated = await argon2i.verify(isExist.password, inputPassword);
+            const inputPassword = Buffer.from(password)
+            const isAuthenticated = await argon2i.verify(
+              isExist.password,
+              inputPassword
+            )
             if (isAuthenticated) {
-              const { id, profile: { name }, email } = isExist
-              return Promise.resolve({ id, name, email })
+              const {
+                id,
+                profile: { name },
+                email
+              } = isExist
+              return Promise.resolve(true)
             }
             return Promise.resolve(false)
           } else {
@@ -56,7 +64,7 @@ const options = {
         } catch (error) {
           return Promise.resolve(false)
         }
-      },
+      }
     })
   ],
   secret: process.env.SECRET,
@@ -87,7 +95,9 @@ const options = {
       })
       if (!isSessionSaved) {
         try {
-          const expiredAt = new Date(new Date().getTime() + 60 * 60 * 1 * 1000).toISOString()
+          const expiredAt = new Date(
+            new Date().getTime() + 60 * 60 * 1 * 1000
+          ).toISOString()
           await prisma.session.create({
             data: {
               userId,
@@ -105,7 +115,7 @@ const options = {
       const { id: userId } = user
       const { value: projectId } = await prisma.option.findFirst({
         where: {
-          name: "PROJECT_ID"
+          name: 'PROJECT_ID'
         }
       })
       const lastSession = await prisma.session.findFirst({
@@ -123,7 +133,7 @@ const options = {
                   name: true
                 }
               },
-              groupId: true,
+              groupId: true
             }
           }
         },
@@ -134,4 +144,4 @@ const options = {
       return Promise.resolve({ ...session, user, lastSession, projectId })
     }
   }
-};
+}
