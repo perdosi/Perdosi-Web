@@ -1,0 +1,248 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["createMany", "groupBy"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String                @id @default(uuid())
+  email       String?               @unique
+  password    String?
+  role        String                @default("USER")
+  projectId   String                @default("1") @map("project_id")
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+  groupId     String?
+  group       Group?                @relation(fields: [groupId], references: [id])
+  progress    CourseProgress[]
+  payment     PaymentConfirmation[]
+  profile     Profile?
+  quizScore   QuizScore[]
+  quizSession QuizSession[]
+  sessions    Session[]
+  questionBox QuestionBox[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  expiredAt DateTime @map("expired_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  name        String?
+  address     String?
+  institution String?
+  phoneNumber String?  @map("phone_number")
+  userId      String?  @unique @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@map("profiles")
+}
+
+model QuestionBox {
+  id          String   @id @default(uuid())
+  question    String
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+  projectId   String   @default("1") @map("project_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  @@map("question_boxes")
+}
+
+model Group {
+  id                  String                @id @default(uuid())
+  projectId           String                @default("1") @map("project_id")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  PaymentConfirmation PaymentConfirmation[]
+  User                User[]
+
+  @@map("groups")
+}
+
+model PricingGroup {
+  id        String    @id @default(uuid())
+  name      String
+  isActive  Boolean   @default(false) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  pricing   Pricing[]
+
+  @@map("pricing_groups")
+}
+
+model Pricing {
+  id                  String                @id @default(uuid())
+  name                String
+  amount              String
+  pricingGroupId      String?               @map("pricing_group_id")
+  isActive            Boolean               @default(false) @map("is_active")
+  totalMember         Int                   @default(1) @map("total_member")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  pricingGroup        PricingGroup?         @relation(fields: [pricingGroupId], references: [id])
+  PaymentConfirmation PaymentConfirmation[]
+}
+
+model PaymentConfirmation {
+  id            String   @id @default(uuid())
+  receiptUrl    String?  @map("receipt_url")
+  accountName   String?  @map("account_name")
+  accountNumber String?  @map("account_number")
+  amount        String?
+  settlement    String   @default("WAITING_CONFIRMATION")
+  groupId       String?  @map("group_id")
+  userId        String?  @map("user_id")
+  pricingId     String?  @map("pricing_id")
+  projectId     String   @default("1") @map("project_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  group         Group?   @relation(fields: [groupId], references: [id])
+  pricing       Pricing? @relation(fields: [pricingId], references: [id])
+  user          User?    @relation(fields: [userId], references: [id])
+
+  @@map("payment_confirmations")
+}
+
+model Option {
+  id    String  @id @default(uuid())
+  name  String?
+  value String?
+
+  @@map("options")
+}
+
+model Instructor {
+  id      String   @id @default(uuid())
+  name    String?
+  courses Course[]
+
+  @@map("instructors")
+}
+
+model CourseCategory {
+  id      String   @id @default(uuid())
+  name    String?
+  courses Course[]
+
+  @@map("course_categories")
+}
+
+model Course {
+  id               String           @id @default(uuid())
+  name             String?
+  type             String           @default("PPT")
+  embedLink        String           @map("embed_link")
+  courseCategoryId String?          @map("course_category_id")
+  instructorId     String?          @map("instructor_id")
+  projectId        String           @default("1") @map("project_id")
+  expiredAt        DateTime         @map("expired_at")
+  publishedAt      DateTime         @map("published_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  courseCategory   CourseCategory?  @relation(fields: [courseCategoryId], references: [id])
+  instructor       Instructor?      @relation(fields: [instructorId], references: [id])
+  progress         CourseProgress[]
+
+  @@map("courses")
+}
+
+model CourseProgress {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  courseId  String   @map("course_id")
+  projectId String   @default("1") @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("course_progress")
+}
+
+model Quiz {
+  id           String         @id @default(uuid())
+  name         String?
+  projectId    String         @default("1") @map("project_id")
+  expiredAt    DateTime       @map("expired_at")
+  publishedAt  DateTime       @map("published_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  quizAnswer   QuizAnswer[]
+  quizQuestion QuizQuestion[]
+  quizScore    QuizScore[]
+
+  @@map("quizes")
+}
+
+model QuizQuestion {
+  id          String        @id @default(uuid())
+  label       String
+  quizId      String?       @map("quiz_id")
+  projectId   String        @default("1") @map("project_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  quiz        Quiz?         @relation(fields: [quizId], references: [id])
+  quizSession QuizSession[]
+
+  @@map("quiz_questions")
+}
+
+model QuizAnswer {
+  id          String        @id @default(uuid())
+  label       String
+  isCorrect   Boolean       @default(false) @map("is_correct")
+  quizId      String?       @map("quiz_id")
+  projectId   String        @default("1") @map("project_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  quiz        Quiz?         @relation(fields: [quizId], references: [id])
+  quizSession QuizSession[]
+
+  @@map("quiz_answers")
+}
+
+model QuizSession {
+  id         String        @id @default(uuid())
+  userId     String?       @map("user_id")
+  questionId String?       @map("question_id")
+  answerId   String?       @map("answer_id")
+  projectId  String        @default("1") @map("project_id")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  answer     QuizAnswer?   @relation(fields: [answerId], references: [id])
+  question   QuizQuestion? @relation(fields: [questionId], references: [id])
+  user       User?         @relation(fields: [userId], references: [id])
+
+  @@map("quiz_sessions")
+}
+
+model QuizScore {
+  id        String   @id @default(uuid())
+  score     Int?
+  userId    String?  @map("user_id")
+  quizId    String?  @map("quiz_id")
+  projectId String   @default("1") @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  quiz      Quiz?    @relation(fields: [quizId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("quiz_scores")
+}
