@@ -1,7 +1,7 @@
 import { NextApiHandler } from 'next'
 import NextAuth from 'next-auth'
 import Providers from 'next-auth/providers'
-import { argon2i } from 'argon2-ffi'
+import argon2 from 'argon2'
 
 import prisma from 'lib/prisma'
 import { clearSessionAPI } from 'services/api'
@@ -44,10 +44,9 @@ const options = {
             }
           })
           if (isExist) {
-            const inputPassword = Buffer.from(password)
-            const isAuthenticated = await argon2i.verify(
+            const isAuthenticated = await argon2.verify(
               isExist.password,
-              inputPassword
+              password
             )
             if (isAuthenticated) {
               const {
@@ -55,7 +54,7 @@ const options = {
                 profile: { name },
                 email
               } = isExist
-              return Promise.resolve(true)
+              return Promise.resolve({ id, name, email })
             }
             return Promise.resolve(false)
           } else {

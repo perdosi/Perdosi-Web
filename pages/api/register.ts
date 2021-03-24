@@ -1,15 +1,10 @@
 import axios from 'axios'
-import { argon2i } from 'argon2-ffi'
-const crypto = require('crypto')
-const util = require('util')
+import argon2 from 'argon2'
 
 import { JSONResponse } from 'utils/jsonResponse'
 import prisma from 'lib/prisma'
 
-const getRandomBytes = util.promisify(crypto.randomBytes)
-
 export default async (req, res) => {
-  const salt = await getRandomBytes(32)
   if (!req.body || req.method !== 'POST') {
     JSONResponse(res, 400)
   }
@@ -67,7 +62,7 @@ export default async (req, res) => {
   await Promise.all(
     peserta.map(
       async ({ name, institution, email, password, phoneNumber, address }) => {
-        const hashpassword = await argon2i.hash(password, salt)
+        const hashpassword = await argon2.hash(password)
         let user
         try {
           user = await prisma.user.create({
