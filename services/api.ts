@@ -2,11 +2,11 @@ import axios from 'axios'
 import FormData from 'form-data'
 
 const api = axios.create({
-  baseURL: process.env.NEXTAUTH_URL + '/api'
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL + '/api'
 })
 
 const protectedAPI = axios.create({
-  baseURL: process.env.NEXTAUTH_URL + '/api',
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL + '/api',
   withCredentials: true
 })
 
