@@ -95,10 +95,10 @@ export default async (req, res) => {
     const { amount: total } = await prisma.pricing.findFirst({
       where: { id: pricingId }
     })
-    await axios.post(
-      process.env.NEXT_PUBLIC_BASE_API_URL + `/register-success`,
-      { peserta, total }
-    )
+    await axios.post(process.env.NEXTAUTH_URL + `/register-success`, {
+      peserta,
+      total
+    })
   } catch (error) {
     JSONResponse(res, 200)
   }

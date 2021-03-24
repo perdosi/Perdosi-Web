@@ -34,7 +34,7 @@ export default async (req, res) => {
           }
         ],
         Subject: 'Pendaftaran Akun Perdosi Berhasil!',
-        HTMLPart: `<h2>Terima kasih telah melakukan pendaftaran</h3><p>Berikut ini informasi login akun</p>${credentialList}<br /><hr />Jumlah yang harus dibayar<br /><strong>Rp${(
+        HTMLPart: `<h3>Terima kasih telah melakukan pendaftaran</h3><p>Berikut ini informasi login akun</p>${credentialList}<br /><hr />Jumlah yang harus dibayar<br /><strong>Rp${(
           total / 1000
         ).toFixed(
           3
