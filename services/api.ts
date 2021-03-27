@@ -10,6 +10,8 @@ const protectedAPI = axios.create({
   withCredentials: true
 })
 
+export const fetcher = (url) => axios.get(url).then((res) => res.data)
+
 export const registerAPI = async (payload) => {
   try {
     const response = await api.post(`/register`, payload)
