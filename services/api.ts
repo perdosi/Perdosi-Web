@@ -90,3 +90,12 @@ export const courseAPI = async () => {
     throw error
   }
 }
+
+export const quizAPI = async () => {
+  try {
+    const response = await api.post(`/quiz/list`)
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}

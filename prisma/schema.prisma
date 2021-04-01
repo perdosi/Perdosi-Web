@@ -184,7 +184,6 @@ model Quiz {
   publishedAt  DateTime       @map("published_at")
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
-  quizAnswer   QuizAnswer[]
   quizQuestion QuizQuestion[]
   quizScore    QuizScore[]
 
@@ -200,6 +199,7 @@ model QuizQuestion {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   quiz        Quiz?         @relation(fields: [quizId], references: [id])
   quizSession QuizSession[]
+  quizAnswer  QuizAnswer[]
 
   @@map("quiz_questions")
 }
@@ -208,11 +208,11 @@ model QuizAnswer {
   id          String        @id @default(uuid())
   label       String
   isCorrect   Boolean       @default(false) @map("is_correct")
-  quizId      String?       @map("quiz_id")
+  quizQuestionId      String?       @map("quiz_question_id")
   projectId   String        @default("1") @map("project_id")
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
-  quiz        Quiz?         @relation(fields: [quizId], references: [id])
+  quizQuestion        QuizQuestion?         @relation(fields: [quizQuestionId], references: [id])
   quizSession QuizSession[]
 
   @@map("quiz_answers")

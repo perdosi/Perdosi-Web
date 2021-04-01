@@ -16,34 +16,47 @@ export default async (req, res) => {
     lastSession: { userId },
     projectId
   } = session
-  const response = await prisma.courseCategory.findMany({
-    include: {
-      courses: {
+  const response = await prisma.quiz.findMany({
+    where: {
+      AND: [
+        {
+          publishedAt: {
+            lte: new Date(today())
+          }
+        },
+        {
+          expiredAt: {
+            gte: new Date(today())
+          }
+        }
+      ]
+    },
+    select: {
+      name: true,
+      quizQuestion: {
         where: {
-          AND: [
-            {
-              publishedAt: {
-                lte: new Date(today())
-              }
-            },
-            {
-              expiredAt: {
-                gte: new Date(today())
-              }
-            }
-          ]
+          projectId: '1'
         },
         select: {
-          name: true,
-          instructor: true,
-          progress: {
+          label: true,
+          quizAnswer: {
+            select: {
+              label: true,
+              id: true
+            }
+          },
+          quizSession: {
+            take: 1,
             where: {
               userId,
               projectId
             },
-            take: 1,
             select: {
-              createdAt: true
+              answer: {
+                select: {
+                  isCorrect: true
+                }
+              }
             }
           }
         }
